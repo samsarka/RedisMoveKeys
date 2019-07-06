@@ -17,43 +17,53 @@ namespace RedisMoveKeys
             InitializeComponent();
         }
 
-
-
+       
         private void Form1_Load(object sender, EventArgs e)
         {
-            string src = txtkey1.Text;
-            string dest = txtkey2.Text;
+            
 
             
         }
 
-        static string frmconStr = "";
-        static string toconStr = "";
+        static String frmconStr = "";
+        static String toconStr = "";
 
 
         private void Move_Click(object sender, EventArgs e)
         {
-           
+            if ((txtkey1.TextLength > 0) && (txtkey2.TextLength > 0))
+            {
+                frmconStr = txtkey1.Text;
+                toconStr = txtkey2.Text;
 
-            string connectionString = frmconStr;
-            ConfigurationOptions options = ConfigurationOptions.Parse(connectionString);
-            ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(options);
-            IDatabase db = connection.GetDatabase();
-            EndPoint endPoint = connection.GetEndPoints().First();
-            RedisKey[] keys = connection.GetServer(endPoint).Keys(pattern: "*").ToArray();
+               
+                ConfigurationOptions options = ConfigurationOptions.Parse(frmconStr);
+                ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(options);
+                IDatabase db = connection.GetDatabase();
+                EndPoint endPoint = connection.GetEndPoints().First();
+                RedisKey[] keys = connection.GetServer(endPoint).Keys(pattern: "*").ToArray();
 
-            foreach (RedisKey key in  keys)
+
+
+                foreach (RedisKey key in keys)
                 {
 
-                txtkeyval.Text = txtkeyval.Text + Environment.NewLine + key.ToString();
-                setDestination(key);
+                    txtkeyval.Text = txtkeyval.Text + Environment.NewLine + key.ToString();
+                    setDestination(key);
+                }
+
+                MessageBox.Show("Move Completed.");
             }
 
-            MessageBox.Show("Move Completed.");
+            else
+            {
+                MessageBox.Show("Keys are missing !");
+            }
         }
-
         private static Lazy<ConnectionMultiplexer> LazyfrmConn = new Lazy<ConnectionMultiplexer>(() =>
         {
+           
+
             return ConnectionMultiplexer.Connect(frmconStr);
         });
 
@@ -74,24 +84,31 @@ namespace RedisMoveKeys
 
         private void btnListkey2_Click(object sender, EventArgs e)
         {
-            string connectionString = toconStr;
-            ConfigurationOptions options = ConfigurationOptions.Parse(connectionString);
-            ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(options);
-            IDatabase db = connection.GetDatabase();
-            EndPoint endPoint = connection.GetEndPoints().First();
-            RedisKey[] keys = connection.GetServer(endPoint).Keys(pattern: "*").ToArray();
-
-            txtkeyval.Text = "*****Listing Destination Keys*****";
-            foreach (RedisKey key in keys)
+            if (txtkey2.TextLength > 0)
             {
+                
+                ConfigurationOptions options = ConfigurationOptions.Parse(toconStr);
+                ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(options);
+                IDatabase db = connection.GetDatabase();
+                EndPoint endPoint = connection.GetEndPoints().First();
+                RedisKey[] keys = connection.GetServer(endPoint).Keys(pattern: "*").ToArray();
 
-                txtkeyval.Text = txtkeyval.Text + Environment.NewLine + key.ToString();
-                setDestination(key);
+                txtkeyval.Text = "*****Listing " + keys.Count().ToString() + " " + endPoint.ToString() + "  Keys*****";
+                foreach (RedisKey key in keys)
+                {
+
+                    txtkeyval.Text = txtkeyval.Text + Environment.NewLine + key.ToString();
+                    setDestination(key);
+                }
+
+                MessageBox.Show("List Completed.");
             }
 
-            MessageBox.Show("List Completed.");
-        }
+            else
+            {
+                MessageBox.Show("Key 2 Missing !");
+            }
 
-      
+        }
     }
 }
